@@ -9,14 +9,13 @@ class Navigation:
         self.input_handler: InputHandler = InputHandler(input_source=input)
         self.user: User = User(username='', password='')
         self.auth: Auth = Auth()            
-   
+
     def start(self):
         self.ui.show_main_menu()
         choice = self.input_handler.get_menu_choice()
         match choice:
             case '1':
                 self.login()
-                self.start_exam()
             case '2':
                 self.register()
             case '3':
@@ -35,6 +34,7 @@ class Navigation:
         password = self.input_handler.get_password()
         if self.auth.login(username, password):      
             self.ui.show_login_success()
+            self.start_exam()
         else:
             self.ui.show_login_failure()
             self.start()                        
@@ -51,7 +51,6 @@ class Navigation:
             self.start()  
 
     def start_exam(self) -> None:
-        # Placeholder for starting the exam
         self.ui.show_info("Starting the exam...")
         # Here you would implement the logic to start the exam, such as loading questions, etc.
 
