@@ -1,63 +1,67 @@
 # PyExam CLI
 
 ## Overview
+
 **PyExam CLI** is a command-line application designed for managing and taking exams. It provides a user-friendly interface for students to register, log in, take exams, and view their results — all from your terminal. The application is built in Python with a modular design, making it easy to maintain and scale.
 
 ## Features
-- 🧑‍🎓 User registration and login  
-- 📝 Exam management system  
-- 📊 Result viewing  
-- 🎨 Styled terminal output using `rich`  
-- 🗃️ SQLite-based storage (no external DB required)  
-- 🔧 Modular architecture for clean separation of concerns  
-- 💻 Command-line interface with helpful prompts  
-- 🚀 Smooth and simple user experience  
+
+-   🧑‍🎓 User registration and login
+-   📝 Exam management system
+-   📊 Result viewing
+-   🎨 Styled terminal output using `rich`
+-   🗃️ SQLite-based storage (no external DB required)
+-   🔧 Modular architecture for clean separation of concerns
+-   💻 Command-line interface with helpful prompts
+-   🚀 Smooth and simple user experience
 
 ## Requirements
-- Python 3.13 or higher  
-- [`rich`](https://pypi.org/project/rich/) library (for beautiful CLI output)  
-- SQLite3 (bundled with Python)
+
+-   Python 3.13 or higher
+-   [`rich`](https://pypi.org/project/rich/) library (for beautiful CLI output)
+-   SQLite3 (bundled with Python)
 
 ## Installation
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/RupeshBhandari/pyexam-cli.git
-   ```
+
+    ```bash
+    git clone https://github.com/RupeshBhandari/pyexam-cli.git
+    ```
 
 2. Navigate to the project directory:
 
-   ```bash
-   cd pyexam-cli
-   ```
+    ```bash
+    cd pyexam-cli
+    ```
 
 3. Install required libraries:
 
-   ```bash
-   pip install rich
-   ```
+    ```bash
+    pip install rich
+    ```
 
 4. Run the application:
 
-   ```bash
-   python main.py
-   ```
+    ```bash
+    python main.py
+    ```
 
 ## Usage
 
 1. Launch the app with:
 
-   ```bash
-   python main.py
-   ```
+    ```bash
+    python main.py
+    ```
 
 2. Register or log in via the prompts.
 
 3. After logging in, you can:
 
-   * Take exams
-   * View results
-   * Navigate easily using CLI options
+    - Take exams
+    - View results
+    - Navigate easily using CLI options
 
 4. Use the `help` command to see available commands and actions.
 
@@ -68,12 +72,12 @@ flowchart TD
     A[main.py] --> B[navigator.py]
     B --> C[input_handler.py]
     B --> D[ui.py]
-    
+
     B --> E[auth.user.py]
     B --> F[exams.exam_manager.py]
     B --> G[logic.evaluator.py]
     B --> H[storage.database.py]
-    
+
     C -->|Gets user input| B
     D -->|Prints styled output| B
     E -->|Handles login/register| B
@@ -101,6 +105,27 @@ flowchart TD
    ADMIN_MENU_OPTIONS -->|7| EXIT_APPLICATION_OPTIONS
 ```
 
+### Database Schema
+
+```mermaid
+erDiagram
+   USER {
+         INT id PK
+         VARCHAR username
+         VARCHAR password
+         VARCHAR email
+         VARCHAR role
+    }
+    EXAM {
+        INT exam_id PK
+        VARCHAR name
+        DATE date
+        INT duration
+        INT questions_count
+        INT created_by FK
+    }
+    USER ||--o{ EXAM : creates
+```
 
 ## Contributing
 
