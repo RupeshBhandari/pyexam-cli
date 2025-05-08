@@ -19,13 +19,15 @@ class UserManager:
             raise ValueError("User already exists")
 
     def get_user(self, username) -> User | None:
-        cursor = self.database.execute(
-            "SELECT username, password, is_active FROM users WHERE username = ?",
-            (username,),
-        )
-        row = cursor.fetchone()
+        """Fetches a user from the database by username."""
+        with self.database as db:
+            db.execute(
+                "SELECT username, password, role FROM users WHERE username = ?",
+                (username,),
+            )
+            row = db.fetchone()
         if row:
-            return User(row[0], row[1], bool(row[2]))
+            return User(row[0], row[1], row[2])
         return None
     
     def register(self, username: str, password: str, role: str = 'student') -> bool:

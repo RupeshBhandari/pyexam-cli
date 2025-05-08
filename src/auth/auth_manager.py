@@ -9,8 +9,8 @@ class AuthManager:
     def login(self, username: str, password: str) -> bool:
         user = self._user_manager.get_user(username)
         if user:
-            self.auth = Auth(user)
-            if self.auth.login(password):
+            self.auth = Auth(user, password)
+            if self.auth.login():
                 return True
         return False
     

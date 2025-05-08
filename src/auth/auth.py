@@ -7,8 +7,8 @@ class Auth:
         self.current_user: User | None = None
         self._is_authenticated: bool = False
 
-    def login(self, password: str) -> bool:
-        if not self.check_password(password):
+    def login(self) -> bool:
+        if not self.check_password(self.user._password_hash):
             return False
         self.current_user = self.user
         self._is_authenticated = True
