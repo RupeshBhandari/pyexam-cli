@@ -1,17 +1,18 @@
 from typing import NoReturn
+from src.auth.auth_manager import AuthManager
 from .input_handler import InputHandler
 from .ui import UI
-from src.auth import User, Auth
 from src.exams import Exam
-
+from src.storage.database_manager import DatabaseManager
+from src.user.user_manager import UserManager
 
 class Navigation:
     def __init__(self):
         self.ui: UI = UI()
         self.input_handler: InputHandler = InputHandler(input_source=input)
-        self.user: User = User(username="", password="")
-        self.auth: Auth = Auth()
-        self.exam: Exam
+        self.user_manager: UserManager = UserManager()
+        self.database_manager: DatabaseManager = DatabaseManager()
+        self.auth_manager: AuthManager = AuthManager()
 
     def start(self):
         # Show main menu before login
@@ -79,7 +80,7 @@ class Navigation:
         self.ui.show_login_menu()
         username = self.input_handler.get_username()
         password = self.input_handler.get_password()
-        return self.auth.login(username, password)
+        return self.auth_manager.login(username, password)
 
     def register(self) -> None:
         """Handles user registration."""
@@ -87,7 +88,7 @@ class Navigation:
         self.ui.show_register_menu()
         username = self.input_handler.get_username()
         password = self.input_handler.get_password()
-        if not self.auth.register(username, password):
+        if not self.user_manager.register(username, password):
             self.ui.show_error("Registration failed! Please try again.")
             self.ui.print_divider()
             return

@@ -1,41 +1,26 @@
-from src.storage.database import Database
-from src.auth.user import User
-from src.interface.ui import UI
-
+from src.user.user import User
+import hashlib
 class Auth:
-    def __init__(self):
-        self.database = Database()
-        self.ui = UI()
+    def __init__(self, user: User, password: str) -> None:
+        self.user: User = user
+        self._password_hash: str = self._hash_password(password)
         self.current_user: User | None = None
+        self._is_authenticated: bool = False
 
-    def register(self, username: str, password: str, role: str = 'student') -> bool:
-        if self.database.get_user(username):
-            self.ui.show_error("User already exists!")
-            self.ui.print_divider()
-            return False  # User already exists
-        user = User(username, password, role)
-        self.database.register_user(user.to_dict())
-        return True
-
-    def login(self, username: str, password: str) -> bool:
-        user_data = self.database.get_user(username)
-        user: User = User.from_dict(user_data)
-        print(user_data)
-        if not user.check_password(password):
+    def login(self, password: str) -> bool:
+        if not self.check_password(password):
             return False
-        self.current_user = user
+        self.current_user = self.user
+        self._is_authenticated = True
         return True
-    
-    def check_password(self, password: str) -> bool:
-        if self.current_user:
-            return self.current_user.check_password(password)
-        return False
 
     def logout(self) -> None:
         self.current_user = None
-
-    def is_authenticated(self) -> bool:
-        return self.current_user is not None
+        self._is_authenticated = False
     
-    def get_current_user(self) -> User | None:
-        return self.current_user
+    def check_password(self, password: str) -> bool:
+        return self._password_hash == self._hash_password(password)
+    
+    @staticmethod
+    def _hash_password(password: str) -> str:
+        return hashlib.sha256(password.encode()).hexdigest()

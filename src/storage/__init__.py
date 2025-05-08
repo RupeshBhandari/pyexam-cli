@@ -1,1 +1,2 @@
-from .base import Storage
+from .database_manager import DatabaseManager
+from .sqllite_database import SQLiteDatabase
