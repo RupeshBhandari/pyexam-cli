@@ -15,7 +15,18 @@ class InputHandler:
 
     def get_password(self) -> str:
         return self.ui.ask_input("Password")
-    
+
     def get_email(self) -> str:
         return self.ui.ask_input("Email")
-    
+
+    def get_exam_title(self) -> str:
+        return self.ui.ask_input("Exam Title")
+
+    def get_exam_id(self) -> str:
+        return self.ui.ask_input("Exam ID")
+
+    def get_exam_duration(self) -> int:
+        return int(self.ui.ask_input("Exam Duration (minutes)"))
+
+    def get_exam_questions_count(self) -> int:
+        return int(self.ui.ask_input("Number of Questions"))

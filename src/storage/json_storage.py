@@ -1,16 +1,17 @@
 import json
 from .base import Storage
 
+
 class JSONStorage(Storage):
     def __init__(self, filepath: str):
         self.filepath = filepath
 
     def _read_data(self):
-        with open(self.filepath, 'r') as f:
+        with open(self.filepath, "r") as f:
             return json.load(f)
 
     def _write_data(self, data) -> None:
-        with open(self.filepath, 'w') as f:
+        with open(self.filepath, "w") as f:
             json.dump(data, f, indent=4)
 
     def get_user(self, username: str):
@@ -28,6 +29,13 @@ class JSONStorage(Storage):
         data = self._read_data()
         return data.get("exams", {}).get(exam_id)
 
+    def add_exam(self, exam_data: dict):
+        data = self._read_data()
+        exams = data.get("exams", {})
+        exams[exam_data["id"]] = exam_data
+        data["exams"] = exams
+        self._write_data(data)
+
     def store_response(self, user_id: str, exam_id: str, response: dict):
         data = self._read_data()
         responses = data.get("responses", {})
@@ -36,4 +44,3 @@ class JSONStorage(Storage):
         responses[user_id][exam_id] = response
         data["responses"] = responses
         self._write_data(data)
-
