@@ -1,0 +1,7 @@
+{
+	"DATABASE": {
+		"type": "sqlite",
+		"db_name": "pyexam_db.db",
+		"path": "data/pyexam_db.db"
+	}
+}
