@@ -2,9 +2,10 @@ from typing import NoReturn
 from src.auth.auth_manager import AuthManager
 from .input_handler import InputHandler
 from .ui import UI
-from src.exams import Exam
+from src.exams.exam_manager import ExamManager
 from src.storage.database_manager import DatabaseManager
 from src.user.user_manager import UserManager
+
 
 class Navigation:
     def __init__(self):
@@ -13,6 +14,7 @@ class Navigation:
         self.user_manager: UserManager = UserManager()
         self.database_manager: DatabaseManager = DatabaseManager()
         self.auth_manager: AuthManager = AuthManager()
+        self.exam_manager: ExamManager = ExamManager()
 
     def start(self):
         # Show main menu before login
@@ -36,7 +38,7 @@ class Navigation:
                 self.start()
 
     def post_login_menu(self):
-        user = self.auth.get_current_user()
+        user = self.user_manager.get_current_user()
         is_admin = user and getattr(user, "role", None) == "admin"
         self.ui.show_post_login_menu(is_admin=is_admin)
         choice = self.input_handler.get_menu_choice()
@@ -101,32 +103,9 @@ class Navigation:
         # Here you would implement the logic to start the exam, such as loading questions, etc.
 
     def show_profile(self):
-        user = self.auth.get_current_user()
+        user = self.auth_manager.get_current_user()
         self.ui.show_profile(user)
 
-    def add_exam(self):
-        self.ui.print_title("Add New Exam", color="green")
-        exam_id = self.input_handler.get_exam_id()
-        title = self.input_handler.get_exam_title()
-        duration = self.input_handler.get_exam_duration()
-        questions_count = self.input_handler.get_exam_questions_count()
-        created_by = (
-            self.auth.get_current_user().username
-            if self.auth.get_current_user()
-            else "admin"
-        )
-        exam_data: Exam = self.exam.from_dict(
-            {
-                "exam_id": exam_id,
-                "name": title,
-                "date": self.input_handler.get_exam_date(),
-                "duration": duration,
-                "questions_count": questions_count,
-                "created_by": created_by,
-            }
-        )
-        exam_data.save_exam()
-        self.ui.show_success("Exam added successfully!")
 
 
 if __name__ == "__main__":
