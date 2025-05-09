@@ -6,7 +6,6 @@ from src.exams.exam_manager import ExamManager
 from src.storage.database_manager import DatabaseManager
 from src.user.user_manager import UserManager
 
-
 class Navigation:
     def __init__(self):
         self.ui: UI = UI()
@@ -38,7 +37,7 @@ class Navigation:
                 self.start()
 
     def post_login_menu(self):
-        user = self.user_manager.get_current_user()
+        user = self.auth_manager._current_user
         is_admin = user and getattr(user, "role", None) == "admin"
         self.ui.show_post_login_menu(is_admin=is_admin)
         choice = self.input_handler.get_menu_choice()

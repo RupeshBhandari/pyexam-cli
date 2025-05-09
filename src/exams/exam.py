@@ -1,4 +1,4 @@
-from src.user import User
+from src.user.user import User
 
 
 class Exam:
