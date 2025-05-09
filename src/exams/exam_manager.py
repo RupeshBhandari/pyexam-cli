@@ -6,7 +6,7 @@ from .exam import Exam
 from .question import Question
 from .answer import Answer
 from src.utils.logger import Logger
-from src.interface.ui import UI
+from src.interface.ui_manager import UIManager  
 from src.storage.database_manager import DatabaseManager
 from src.user.user_manager import UserManager
 from src.interface.input_handler import InputHandler
@@ -16,20 +16,20 @@ from src.auth.auth_manager import AuthManager
 class ExamManager:
     def __init__(
         self,
-        ui: UI,
+       ui_manager: UIManager,
         input_handler: InputHandler,
         user_manager: UserManager,
         database_manager: DatabaseManager,
         logger: Logger,
-        auth_manager=None,
+        auth_manager: AuthManager,
     ) -> None:
-        self.ui: UI = ui
+        self.ui_manager: UIManager = ui_manager
         self.input_handler: InputHandler = input_handler
         self.user_manager: UserManager = user_manager
         self.database_manager: DatabaseManager = database_manager
-        self.logger: Logger = logger
-        self.auth_manager = auth_manager
-        self.exams: List[Exam] = []
+        self._logger: Logger = logger
+        self.auth_manager: AuthManager = auth_manager
+        self.exams: list[Exam] = []
         self.load_exams()
 
     def load_exams(self) -> None:
@@ -51,14 +51,14 @@ class ExamManager:
                 }
                 self.exams.append(Exam.from_dict(exam_dict))
 
-            self.logger.info(f"Loaded {len(self.exams)} exams from database")
+            self._logger.info(f"Loaded {len(self.exams)} exams from database")
         except Exception as e:
-            self.logger.error(f"Error loading exams: {str(e)}")
-            self.ui.show_error(f"Failed to load exams: {str(e)}")
+            self._logger.error(f"Error loading exams: {str(e)}")
+            self.ui_manager.show_error(f"Failed to load exams: {str(e)}")
 
     def add_exam(self) -> bool:
         """Add a new exam with questions."""
-        self.ui.print_title("Add New Exam", color="green")
+        self.ui_manager.print_title("Add New Exam", color="green")
 
         try:
             # Get exam metadata
@@ -87,22 +87,22 @@ class ExamManager:
                 )
 
             # Add questions
-            self.ui.print_title(f"Add {questions_count} Questions", color="cyan")
+            self.ui_manager.print_title(f"Add {questions_count} Questions", color="cyan")
             for i in range(1, questions_count + 1):
                 self._add_question(exam_id, i)
 
             # Reload exams to include the new one
             self.load_exams()
-            self.ui.show_success(
+            self.ui_manager.show_success(
                 f"Exam '{title}' with {questions_count} questions added successfully."
             )
             return True
 
         except Exception as e:
-            self.logger.error(f"Error adding exam: {str(e)}")
-            self.ui.show_error(f"Failed to add exam: {str(e)}")
+            self._logger.error(f"Error adding exam: {str(e)}")
+            self.ui_manager.show_error(f"Failed to add exam: {str(e)}")
             return False
-        self.ui.show_success(f"Exam '{title}' added successfully.")
+        self.ui_manager.show_success(f"Exam '{title}' added successfully.")
 
     def _generate_new_exam_id(self) -> int:
         """Generate a new unique exam ID."""
@@ -207,12 +207,12 @@ class ExamManager:
     def list_exams(self) -> None:
         """List all available exams."""
         if not self.exams:
-            self.ui.show_info("No exams available.")
+            self.ui_manager.show_info_notification("No exams available.")
             return
 
-        self.ui.print_title("Available Exams", color="blue")
+        self.ui_manager.print_title("Available Exams", color="blue")
         for exam in self.exams:
-            self.ui.show_info(
+            self.ui_manager.show_info_notification(
                 f"ID: {exam.exam_id} - {exam.name} (Date: {exam.date}, Duration: {exam.duration} min, Questions: {exam.questions_count})"
             )
 
@@ -220,7 +220,7 @@ class ExamManager:
         """Get an exam by ID."""
         return next((e for e in self.exams if e.exam_id == exam_id), None)
 
-    def get_exam_questions(self, exam_id: int) -> List[Question]:
+    def get_exam_questions(self, exam_id: int) -> list[Question]:
         """Get all questions for a specific exam."""
         questions = []
         try:
@@ -251,26 +251,26 @@ class ExamManager:
         # Get the exam
         exam = self.get_exam(exam_id)
         if not exam:
-            self.ui.show_error(f"Exam with ID {exam_id} not found.")
+            self.ui_manager.show_error(f"Exam with ID {exam_id} not found.")
             return
 
         # Get the user
         user = self.auth_manager.get_current_user()
         if not user:
-            self.ui.show_error("You must be logged in to take an exam.")
+            self.ui_manager.show_error("You must be logged in to take an exam.")
             return
 
         # Get all questions for this exam
         questions = self.get_exam_questions(exam_id)
         if not questions:
-            self.ui.show_error("This exam has no questions.")
+            self.ui_manager.show_error("This exam has no questions.")
             return
 
         # Start the exam
-        self.ui.print_title(f"Starting Exam: {exam.name}", color="green")
-        self.ui.show_info(f"Duration: {exam.duration} minutes")
-        self.ui.show_info(f"Questions: {len(questions)}")
-        self.ui.print_divider()
+        self.ui_manager.print_title(f"Starting Exam: {exam.name}", color="green")
+        self.ui_manager.show_info_notification(f"Duration: {exam.duration} minutes")
+        self.ui_manager.show_info_notification(f"Questions: {len(questions)}")
+        self.ui_manager.print_divider()
 
         # Record answers
         answers = []
@@ -298,11 +298,11 @@ class ExamManager:
                     # Convert to zero-based index
                     user_answer = answer_num - 1
                     break
-                self.ui.show_error(
+                self.ui_manager.show_error(
                     f"Please enter a number between 1 and {len(question.options)}"
                 )
             except ValueError:
-                self.ui.show_error("Please enter a valid number")
+                self.ui_manager.show_error("Please enter a valid number")
 
         # Check if correct
         is_correct = question.is_correct(user_answer)
@@ -330,25 +330,25 @@ class ExamManager:
             q.points for q, a in zip(questions, answers) if a.is_correct
         )
 
-        self.ui.print_title("Exam Results", color="blue")
-        self.ui.show_info(f"Exam: {exam.name}")
-        self.ui.show_info(f"Correct Answers: {correct_count}/{len(questions)}")
-        self.ui.show_info(f"Points: {earned_points}/{total_points}")
-        self.ui.show_info(f"Score: {(earned_points / total_points) * 100:.1f}%")
+        self.ui_manager.print_title("Exam Results", color="blue")
+        self.ui_manager.show_info_notification(f"Exam: {exam.name}")
+        self.ui_manager.show_info_notification(f"Correct Answers: {correct_count}/{len(questions)}")
+        self.ui_manager.show_info_notification(f"Points: {earned_points}/{total_points}")
+        self.ui_manager.show_info_notification(f"Score: {(earned_points / total_points) * 100:.1f}%")
 
         # Detailed results
-        self.ui.print_title("Question Details", color="yellow")
+        self.ui_manager.print_title("Question Details", color="yellow")
         for i, (question, answer) in enumerate(zip(questions, answers), 1):
             result = "✓" if answer.is_correct else "✗"
             user_choice = question.options[answer.user_answer]
             correct_choice = question.options[question.correct_answer]
 
-            self.ui.show_info(f"Q{i}: {result} Your answer: {user_choice}")
+            self.ui_manager.show_info_notification(f"Q{i}: {result} Your answer: {user_choice}")
             if not answer.is_correct:
-                self.ui.show_info(f"   Correct answer: {correct_choice}")
+                self.ui_manager.show_info_notification(f"   Correct answer: {correct_choice}")
 
     def _save_exam_answers(
-        self, username: str, exam_id: int, answers: List[Answer]
+        self, username: str, exam_id: int, answers: list[Answer]
     ) -> None:
         """Save exam answers to the database."""
         try:
@@ -367,9 +367,9 @@ class ExamManager:
                             answer.timestamp.isoformat(),
                         ),
                     )
-            self.logger.info(
+            self._logger.info(
                 f"Saved {len(answers)} answers for user {username} on exam {exam_id}"
             )
         except Exception as e:
-            self.logger.error(f"Error saving exam answers: {str(e)}")
-            self.ui.show_error(f"Failed to save your answers: {str(e)}")
+            self._logger.error(f"Error saving exam answers: {str(e)}")
+            self.ui_manager.show_error(f"Failed to save your answers: {str(e)}")
