@@ -1,11 +1,17 @@
-import sqlite3
-from .user import User
+from logging import Logger
+from src.user.user import User
 from src.storage.database_manager import DatabaseManager
-
+from src.interface.ui import UI
+from src.utils.logger import Logger
 
 class UserManager:
-    def __init__(self) -> None:
-        self.database = DatabaseManager()
+    def __init__(self, 
+                ui: UI,
+                database: DatabaseManager,
+                logger: Logger) -> None:
+        self.database: DatabaseManager = database
+        self.ui: UI = ui
+        self.logger: Logger = logger
 
     def create_user(self, username, password, role) -> User:
         try:

@@ -68,25 +68,185 @@
 ## Design Architecture
 
 ```mermaid
-flowchart TD
-    A[main.py] --> B[navigator.py]
-    B --> C[input_handler.py]
-    B --> D[ui.py]
+classDiagram
+    %% Core Model Classes
+    class User {
+        +username: str
+        -_password_hash: str
+        -_role: str
+        +role() [property]
+        +to_dict()
+        +from_dict(data)
+    }
 
-    B --> E[auth.user.py]
-    B --> F[exams.exam_manager.py]
-    B --> G[logic.evaluator.py]
-    B --> H[storage.database.py]
+    class Exam {
+        +exam_id: int
+        +name: str
+        +date: str
+        +duration: int
+        +questions_count: int
+        +created_by: User
+        +to_dict()
+        +from_dict(data)
+    }
 
-    C -->|Gets user input| B
-    D -->|Prints styled output| B
-    E -->|Handles login/register| B
-    F -->|Handles exam flow| B
-    G -->|Scores & results| B
-    H -->|Reads/writes data| B
+    %% Manager Classes
+    class UserManager {
+        -database: DatabaseManager
+        +create_user(username, password, role)
+        +get_user(username)
+        +register(username, password, role)
+    }
+
+    class ExamManager {
+        -ui: UI
+        -input_handler: InputHandler
+        -auth: AuthManager
+        -exam: Exam
+        +add_exam()
+        +remove_exam(exam_name)
+        +list_exams()
+    }
+
+    class AuthManager {
+        -_user_manager: UserManager
+        -_current_user: User
+        -_is_authenticated: bool
+        -logger: Logger
+        +login(username, password)
+        +get_current_user()
+    }
+
+    class DatabaseManager {
+        -database_name: str
+        -database_path: str
+        -db: SQLiteDatabase
+        +execute(query, params)
+        +fetchall()
+        +fetchone()
+        +retrieve_database_settings(key, file_path)
+    }
+
+    %% Interface Classes
+    class Navigation {
+        -logger: Logger
+        -ui: UI
+        -input_handler: InputHandler
+        -user_manager: UserManager
+        -database_manager: DatabaseManager
+        -auth_manager: AuthManager
+        -exam_manager: ExamManager
+        +start()
+        +post_login_menu()
+        +login()
+        +register()
+        +start_exam()
+        +show_profile()
+        +exit()
+    }
+
+    class UI {
+        -console: Console
+        +print_title(title, color)
+        +print_divider()
+        +ask_input(message)
+        +show_success(message)
+        +show_error(message)
+        +show_info(message)
+        +show_main_menu()
+        +show_post_login_menu(is_admin)
+        +show_login_menu()
+        +show_profile(user)
+    }
+
+    class InputHandler {
+        -input_source: Callable
+        -ui: UI
+        +get_menu_choice()
+        +get_username()
+        +get_password()
+        +get_email()
+        +get_exam_title()
+        +get_exam_duration()
+    }
+
+    %% Authentication Classes
+    class Auth {
+        -user: User
+        -_password_hash: str
+        +check_password(stored_hash)
+        +_hash_password(password)
+    }
+
+    %% Database Classes
+    class Database {
+        <<abstract>>
+        +connect()
+        +execute(query, params)
+        +fetchall()
+        +fetchone()
+        +commit()
+        +close()
+    }
+
+    class SQLiteDatabase {
+        -db_name: str
+        -db_path: str
+        -conn
+        -cursor
+        +connect()
+        +execute(query, params)
+        +fetchall()
+        +fetchone()
+        +commit()
+        +close()
+    }
+
+    %% Utility Classes
+    class Logger {
+        -logger
+        +debug(message, user)
+        +info(message, user)
+        +warning(message, user)
+        +error(message, user)
+        +critical(message, user)
+    }
+
+    %% Relationships
+    Database <|-- SQLiteDatabase : implements
+    DatabaseManager o-- SQLiteDatabase : uses
+    
+    Navigation --> UI : uses
+    Navigation --> InputHandler : uses
+    Navigation --> AuthManager : uses
+    Navigation --> UserManager : uses 
+    Navigation --> ExamManager : uses
+    Navigation --> DatabaseManager : uses
+    Navigation --> Logger : uses
+    
+    AuthManager --> UserManager : uses
+    AuthManager o-- User : stores current
+    AuthManager --> Logger : uses
+    
+    Auth --> User : authenticates
+    
+    UserManager --> DatabaseManager : uses
+    UserManager --> User : creates
+    
+    ExamManager --> Exam : manages
+    Exam --> User : references
+    
+    InputHandler --> UI : uses
+    
+    UI ..> User : displays data
+    UI ..> Exam : displays data
+    
+    SQLiteDatabase --> DatabaseManager : provides connection
+    
+    Logger o-- Logger : singleton
 ```
 
-### Menu Flow
+---
 
 ```mermaid
 flowchart TD
@@ -106,26 +266,6 @@ flowchart TD
 ```
 
 ### Database Schema
-
-```mermaid
-erDiagram
-   USER {
-         INT id PK
-         VARCHAR username
-         VARCHAR password
-         VARCHAR email
-         VARCHAR role
-    }
-    EXAM {
-        INT exam_id PK
-        VARCHAR name
-        DATE date
-        INT duration
-        INT questions_count
-        INT created_by FK
-    }
-    USER ||--o{ EXAM : creates
-```
 
 ## Contributing
 

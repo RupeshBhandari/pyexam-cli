@@ -1,19 +1,33 @@
 from typing import NoReturn
 from src.auth.auth_manager import AuthManager
-from .input_handler import InputHandler
-from .ui import UI
+from src.interface.input_handler import InputHandler
 from src.exams.exam_manager import ExamManager
 from src.storage.database_manager import DatabaseManager
 from src.user.user_manager import UserManager
+from src.utils.logger import Logger
+from src.interface.ui import UI
+
 
 class Navigation:
     def __init__(self):
+        self.logger = Logger()
         self.ui: UI = UI()
         self.input_handler: InputHandler = InputHandler(input_source=input)
-        self.user_manager: UserManager = UserManager()
         self.database_manager: DatabaseManager = DatabaseManager()
-        self.auth_manager: AuthManager = AuthManager()
-        self.exam_manager: ExamManager = ExamManager()
+        self.user_manager: UserManager = UserManager(
+            ui=self.ui, database=self.database_manager, logger=self.logger
+        )
+        self.auth_manager: AuthManager = AuthManager(
+            ui=self.ui, user_manager=self.user_manager, logger=self.logger
+        )
+        self.exam_manager: ExamManager = ExamManager(
+            ui=self.ui,
+            input_handler=self.input_handler,
+            user_manager=self.user_manager,
+            database_manager=self.database_manager,
+            logger=self.logger,
+        )
+        self.logger.info("Navigation initialized.")
 
     def start(self):
         # Show main menu before login
@@ -64,7 +78,7 @@ class Navigation:
                     self.show_profile()
                     self.post_login_menu()
                 case "3":
-                    self.auth.logout()
+                    self.auth_manager.logout()
                     self.ui.show_info("Logged out successfully.")
                     self.start()
                 case "4":
@@ -104,7 +118,6 @@ class Navigation:
     def show_profile(self):
         user = self.auth_manager.get_current_user()
         self.ui.show_profile(user)
-
 
 
 if __name__ == "__main__":

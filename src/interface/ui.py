@@ -29,6 +29,13 @@ ADMIN_MENU_OPTIONS = {
 
 
 class UI:
+    _isinstance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._isinstance:
+            cls._isinstance = super(UI, cls).__new__(cls)
+        return cls._isinstance
+    
     def __init__(self) -> None:
         self.console = Console()
 
