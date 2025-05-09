@@ -1,3 +1,4 @@
+from typing import Dict, Any, Union
 from src.user.user import User
 
 
@@ -9,7 +10,7 @@ class Exam:
         date: str,
         duration: int,
         questions_count: int,
-        created_by: User,
+        created_by: Union[User, str],
     ) -> None:
         self.exam_id = exam_id
         self.name = name
@@ -22,7 +23,7 @@ class Exam:
         return f"Exam({self.exam_id}, {self.name}, {self.date}, {self.duration})"
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: Dict[str, Any]):
         return cls(
             exam_id=data["exam_id"],
             name=data["name"],
@@ -32,7 +33,7 @@ class Exam:
             created_by=data["created_by"],
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "exam_id": self.exam_id,
             "name": self.name,

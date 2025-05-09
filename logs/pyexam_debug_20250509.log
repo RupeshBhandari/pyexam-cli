@@ -1,2 +1,4 @@
 2025-05-09 09:49:06,106 - pyexam - DEBUG - AuthManager initialized
 2025-05-09 09:49:07,914 - pyexam - DEBUG - Attempting to fetch user: 1
+2025-05-09 11:29:57,157 - pyexam - DEBUG - AuthManager initialized
+2025-05-09 11:30:00,668 - pyexam - DEBUG - Attempting to fetch user: 1

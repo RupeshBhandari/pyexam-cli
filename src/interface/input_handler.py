@@ -30,3 +30,12 @@ class InputHandler:
 
     def get_exam_questions_count(self) -> int:
         return int(self.ui.ask_input("Number of Questions"))
+
+    def get_exam_date(self) -> str:
+        """Get exam date (defaults to today)."""
+        from datetime import datetime
+
+        date_input = self.ui.ask_input("Exam Date (YYYY-MM-DD) [Today]")
+        if not date_input:
+            return datetime.now().strftime("%Y-%m-%d")
+        return date_input

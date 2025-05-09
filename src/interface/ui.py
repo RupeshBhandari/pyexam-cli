@@ -19,12 +19,30 @@ STUDENT_MENU_OPTIONS = {
 }
 
 ADMIN_MENU_OPTIONS = {
+    "1": "User Management",
+    "2": "Exam Management",
+    "3": "Logout",
+    "4": "Exit",
+}
+
+ADMIN_MENU_OPTIONS_USER_MANAGEMENT = {
+    "1": "Register New User",
+    "2": "Deregister User",
+    "3": "View All Users",
+    "4": "Update User",
+    "5": "View User Profile",
+    "6": "Back to Main Menu",
+    "7": "Exit",
+}
+
+ADMIN_MENU_OPTIONS_EXAM_MANAGEMENT = {
     "1": "Add Exam",
-    "2": "Register New User",
-    "3": "Deregister User",
-    "4": "View All Users",
-    "5": "Logout",
-    "6": "Exit",
+    "2": "View All Exams",
+    "3": "Update Exam",
+    "4": "Delete Exam",
+    "5": "View Exam Results",
+    "6": "Back to Main Menu",
+    "7": "Exit",
 }
 
 
@@ -35,7 +53,7 @@ class UI:
         if not cls._isinstance:
             cls._isinstance = super(UI, cls).__new__(cls)
         return cls._isinstance
-    
+
     def __init__(self) -> None:
         self.console = Console()
 

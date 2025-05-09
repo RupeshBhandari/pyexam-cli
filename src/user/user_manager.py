@@ -3,7 +3,7 @@ from src.user.user import User
 from src.storage.database_manager import DatabaseManager
 from src.interface.ui import UI
 from src.utils.logger import Logger
-
+import sqlite3
 class UserManager:
     def __init__(self, 
                 ui: UI,
@@ -45,4 +45,27 @@ class UserManager:
         self.database.register_user(user.to_dict())
         return True
 
+    def update_user(self, username, password=None, role=None) -> bool:
+        """Updates user information."""
+        with self.database as db:
+            if password:
+                db.execute(
+                    "UPDATE users SET password = ? WHERE username = ?",
+                    (password, username),
+                )
+            if role:
+                db.execute(
+                    "UPDATE users SET role = ? WHERE username = ?",
+                    (role, username),
+                )
+        return True
+    
+    def delete_user(self, username) -> bool:
+        """Deletes a user from the database."""
+        with self.database as db:
+            db.execute(
+                "DELETE FROM users WHERE username = ?",
+                (username,),
+            )
+        return True
     

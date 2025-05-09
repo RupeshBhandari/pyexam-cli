@@ -40,3 +40,4 @@ class AuthManager:
         self._current_user = None
         self._is_authenticated = False
         self.logger.info("User logged out")
+        self.ui.show_info("Logged out successfully.")

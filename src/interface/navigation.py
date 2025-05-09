@@ -26,6 +26,7 @@ class Navigation:
             user_manager=self.user_manager,
             database_manager=self.database_manager,
             logger=self.logger,
+            auth_manager=self.auth_manager,
         )
         self.logger.info("Navigation initialized.")
 
@@ -59,7 +60,9 @@ class Navigation:
             match choice:
                 case "1":
                     self.add_exam()
+                    self.post_login_menu()
                 case "2":
+                    self.user_manager.create_user()
                     self.show_profile()
                     self.post_login_menu()
                 case "3":
@@ -73,13 +76,13 @@ class Navigation:
         else:
             match choice:
                 case "1":
-                    self.add_exam()
+                    self.start_exam()
+                    self.post_login_menu()
                 case "2":
                     self.show_profile()
                     self.post_login_menu()
                 case "3":
                     self.auth_manager.logout()
-                    self.ui.show_info("Logged out successfully.")
                     self.start()
                 case "4":
                     self.exit()
@@ -99,7 +102,6 @@ class Navigation:
 
     def register(self) -> None:
         """Handles user registration."""
-
         self.ui.show_register_menu()
         username = self.input_handler.get_username()
         password = self.input_handler.get_password()
@@ -111,9 +113,47 @@ class Navigation:
         self.ui.show_registration_success()
         self.start()
 
+    def add_exam(self):
+        """Handler for adding a new exam."""
+        user = self.auth_manager.get_current_user()
+        if not user:
+            self.ui.show_error("You must be logged in to add an exam.")
+            return
+
+        # Only admins can add exams
+        if user.role != "admin":
+            self.ui.show_error("Only administrators can add exams.")
+            return
+
+        # Call exam manager's add_exam method
+        success = self.exam_manager.add_exam()
+
     def start_exam(self) -> None:
-        self.ui.show_info("Starting the exam...")
-        # Here you would implement the logic to start the exam, such as loading questions, etc.
+        """Start taking an exam"""
+        # Check if user is logged in
+        if not self.auth_manager.get_current_user():
+            self.ui.show_error("You must be logged in to take an exam.")
+            return
+
+        # Display available exams
+        self.exam_manager.list_exams()
+        if not self.exam_manager.exams:
+            return
+
+        # Get exam selection
+        while True:
+            exam_id_str = self.input_handler.get_exam_id()
+            try:
+                exam_id = int(exam_id_str)
+                exam = self.exam_manager.get_exam(exam_id)
+                if exam:
+                    break
+                self.ui.show_error(f"Exam with ID {exam_id} not found.")
+            except ValueError:
+                self.ui.show_error("Please enter a valid exam ID.")
+
+        # Start the exam
+        self.exam_manager.take_exam(exam_id)
 
     def show_profile(self):
         user = self.auth_manager.get_current_user()
